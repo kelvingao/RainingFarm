@@ -17,23 +17,30 @@ console.log("Server started.");
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 
-class Player {
-    constructor(id) {
-        this.x = 250;
-        this.y = 250;
-        this.id = id;
-        this.number = "" + Math.floor(10 * Math.random());
+var Player = function(id) {
+    var self = {
+        x: 250,
+        y: 250,
+        id: id,
+        number: "" + Math.floor(10 * Math.random()),
+        pressingRight: false,
+        pressingLeft: false,
+        pressingUp: false,
+        pressingDown: false,
+        maxSpd: 10,
     }
+    self.updatePosition = function() {
+        if(self.pressingRight)
+            self.x += self.maxSpd;
+        if(self.pressingLeft)
+            self.x -= self.maxSpd;
+        if(self.pressingUp)
+            self.y -= self.maxSpd;
+        if(self.pressingDown)
+            self.y += self.maxSpd;
+    }
+    return self;
 }
-// var Player = function(id) {
-//     var self = {
-//         x: 250,
-//         y: 250,
-//         id: id,
-//         number: "" + Math.floor(10 * Math.random())
-//     }
-//     return self;
-//}
 
 var io = require('socket.io')(serv, {});
 io.sockets.on('connection', function(socket) {
@@ -41,21 +48,31 @@ io.sockets.on('connection', function(socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
 
-    var player = new Player(socket.id);
+    var player = Player(socket.id);
     PLAYER_LIST[socket.id] = player;
 
     socket.on('disconnect', function() {
         delete SOCKET_LIST[socket.id];
         delete PLAYER_LIST[socket.id];
     })
+
+    socket.on('keyPress', function(data) {
+        if(data.inputId == 'left')
+            player.pressingLeft = data.state;
+        else if(data.inputId == 'right')
+            player.pressingRight = data.state;
+        else if(data.inputId == 'up')
+            player.pressingUp = data.state;
+        else if(data.inputId == 'down')
+            player.pressingDown = data.state;
+    });
 });
 
 setInterval(function(){
     var pack = [];
     for (var i in PLAYER_LIST) {
         var player = PLAYER_LIST[i];
-        player.x++;
-        player.y++;
+        player.updatePosition();
         pack.push({
             x:player.x,
             y:player.y,

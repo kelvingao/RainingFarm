@@ -4,8 +4,15 @@ html
     link(rel="stylesheet" href="client/styles/game.css")
     body
         canvas#ctx(width=500, height=500)
+        #chat-text
+            //div Hello
+        form#chat-form
+            input#chat-input(type="text")
         script(src="https://cdn.socket.io/socket.io-1.4.5.js")
         script.
+            var chatText = document.getElementById('chat-text');
+            var chatInput = document.getElementById('chat-input');
+            var chatForm = document.getElementById('chat-form');
             var ctx = document.getElementById("ctx").getContext("2d");
             ctx.font = '30px Arial';
 
@@ -18,9 +25,18 @@ html
                 }
 
                 for (var i = 0; i < data.bullet.length; i++) {
-                    ctx.fillRect(data.bullet[i].x-5, data.bullet[i].y-5, 10, 10);
+                    ctx.fillRect(data.bullet[i].x-5, data.bullet[i].y-5, 10,10);
                 }
             });
+
+            socket.on('addToChat', function(data) {
+                chatText.innerHTML += '<div>' + data + '</div>';
+            })
+            chatForm.onsubmit = function(e) {
+                e.preventDefault();
+                socket.emit('sendMsgToServer', chatInput.value);
+                chatInput.value = '';
+            }
             document.onkeydown = function(event) {
                 if(event.keyCode == 68)  // d
                     socket.emit('keyPress', {inputId:'right', state:true});

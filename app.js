@@ -88,6 +88,7 @@ var Player = function(id) {
 // Global
 Player.list = {};
 Player.onConnect = function(socket) {
+    console.log('Player connect.');
     var player = Player(socket.id);
     socket.on('keyPress', function(data) {
         if(data.inputId == 'left')
@@ -117,7 +118,15 @@ io.sockets.on('connection', function(socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
 
-    Player.onConnect(socket);
+    socket.on('signIn', function(data) {
+        console.log("server listen signIn");
+        if(data.username === 'bob' && data.password === 'asd') {
+            Player.onConnect(socket);
+            socket.emit('signInResponse', {success:true});
+        } else {
+            socket.emit('signInResponse', {success:false});
+        }
+    });
 
     socket.on('disconnect', function() {
         delete SOCKET_LIST[socket.id];

@@ -3,20 +3,52 @@ html
     head
     link(rel="stylesheet" href="client/styles/game.css")
     body
-        canvas#ctx(width=500, height=500)
-        #chat-text
-            //div Hello
-        form#chat-form
-            input#chat-input(type="text")
+        div#signDiv
+            | Username: 
+            input#signDiv-username(type="text")
+            br
+            | Password: 
+            input#signDiv-password(type="text")
+            button#signDiv-signIn Sign In
+            button#signDiv-signUp Sign Up
+        div#gameDiv
+            canvas#ctx(width=500, height=500)
+            #chat-text
+                //div Hello
+            form#chat-form
+                input#chat-input(type="text")
         script(src="https://cdn.socket.io/socket.io-1.4.5.js")
         script.
+            var socket = io();
+
+            //sign
+            var signDiv = document.getElementById('signDiv');
+            var signDivUsername = document.getElementById('signDiv-username');
+            var signDivSignIn = document.getElementById('signDiv-signIn');
+            var signDivSignUp = document.getElementById('signDiv-signUp');
+            var signDivPassword = document.getElementById('signDiv-password');
+
+            signDivSignIn.onclick = function() {
+                socket.emit('signIn', {username:signDivUsername.value, password:signDivPassword.value});
+            }
+
+            socket.on('signInResponse', function(data){
+                if(data.success) {
+                    signDiv.style.display = 'none';
+                    gameDiv.style.display = 'inline-block';
+                } else {
+                    alert("Sign in unsuccessful.");
+                }
+            });
+
+            //game
             var chatText = document.getElementById('chat-text');
             var chatInput = document.getElementById('chat-input');
             var chatForm = document.getElementById('chat-form');
             var ctx = document.getElementById("ctx").getContext("2d");
             ctx.font = '30px Arial';
 
-            var socket = io();
+            
             
             socket.on('newPosition', function(data) {
                 ctx.clearRect(0,0,500,500);

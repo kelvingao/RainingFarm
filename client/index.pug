@@ -8,7 +8,7 @@ html
             input#signDiv-username(type="text")
             br
             | Password: 
-            input#signDiv-password(type="text")
+            input#signDiv-password(type="password")
             button#signDiv-signIn Sign In
             button#signDiv-signUp Sign Up
         div#gameDiv
@@ -32,12 +32,24 @@ html
                 socket.emit('signIn', {username:signDivUsername.value, password:signDivPassword.value});
             }
 
+            signDivSignUp.onclick = function() {
+                socket.emit('signUp', {username:signDivUsername.value, password:signDivPassword.value});
+            }
+
             socket.on('signInResponse', function(data){
                 if(data.success) {
                     signDiv.style.display = 'none';
                     gameDiv.style.display = 'inline-block';
                 } else {
                     alert("Sign in unsuccessful.");
+                }
+            });
+
+            socket.on('signUpResponse', function(data){
+                if(data.success) {
+                    alert("Sign up successful.")
+                } else {
+                    alert("Sign up unsuccessful.");
                 }
             });
 

@@ -133,6 +133,7 @@ Player.onConnect = function(socket) {
     });
 
     socket.emit('init', {
+        selfId:socket.id,
         player:Player.getAllInitPack(),
         bullet:Bullet.getAllInitPack(),
     });
